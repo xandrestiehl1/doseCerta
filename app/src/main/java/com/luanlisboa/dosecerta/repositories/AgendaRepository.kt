@@ -165,5 +165,34 @@ class AgendaRepository(context: Context) {
         db.close()
     }
 
+    fun atualizarAgenda(alertaId: Long, periodicidade: Int, duracao: Int): Boolean {
+        val db = dbHelper.writableDatabase
+
+        // Obter a data e hora atual no formato esperado pela tabela
+        val formato = SimpleDateFormat("yyyy-MM-dd'T'HH:mm", Locale.getDefault())
+        val dataAtual = formato.format(Date())
+
+        // Remove os registros antigos da agenda que estão após a data e hora atual
+        db.delete(
+            "tbl_Agenda",
+            "alertaId = ? AND dataHora > ?",
+            arrayOf(alertaId.toString(), dataAtual)
+        )
+
+        // Calcular os novos horários da agenda
+        //val horarios = calcularHorarios(horarioInicial, periodicidade, duracao)
+
+        // Inserir os novos horários na agenda
+        val contentValues = ContentValues()
+      /**  for (horario in ) {
+            contentValues.clear()
+            contentValues.put("alertaId", alertaId)
+            contentValues.put("dataHora", horario)
+            db.insert("tbl_Agenda", null, contentValues)
+        }**/
+
+        db.close()
+        return true
+    }
 
 }

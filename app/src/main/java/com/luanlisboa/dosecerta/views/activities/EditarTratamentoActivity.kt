@@ -8,6 +8,7 @@ import com.google.android.material.color.utilities.QuantizerCelebi
 import com.luanlisboa.dosecerta.R
 import com.luanlisboa.dosecerta.adapters.CustomSpinnerAdapter
 import com.luanlisboa.dosecerta.databinding.ActivityEditarTratamentoBinding
+import com.luanlisboa.dosecerta.repositories.AgendaRepository
 import com.luanlisboa.dosecerta.repositories.AlertaRepository
 import com.luanlisboa.dosecerta.repositories.MedicamentoRepository
 import com.luanlisboa.dosecerta.utils.PickerUtils
@@ -19,6 +20,7 @@ class EditarTratamentoActivity : AppCompatActivity() {
     private lateinit var binding: ActivityEditarTratamentoBinding
     private lateinit var medicamentoRepository: MedicamentoRepository
     private lateinit var alertaRepository: AlertaRepository
+    private lateinit var agendaRepository: AgendaRepository
     private var medicamentoId: Long? = null
     private var alertaId: Long? = null
 
@@ -50,6 +52,7 @@ class EditarTratamentoActivity : AppCompatActivity() {
         // Configura o botão de salvar
         binding.btnSalvar.setOnClickListener {
             salvarMedicamento()
+            salvarAlerta(alertaId?.toLong() ?: -1)
         }
 
         // Configura o botão voltar com confirmação
@@ -65,11 +68,6 @@ class EditarTratamentoActivity : AppCompatActivity() {
     }
 
     private fun configurarPickerDialogs() {
-        // Horário da Primeira Dose
-        binding.horarioPrimeiraDoseEditar.setOnClickListener {
-            PickerUtils.showTimePickerDialog(this, binding.horarioPrimeiraDoseEditar)
-        }
-
         // Periodicidade
         binding.periodicidadeEditar.setOnClickListener {
             PickerUtils.showNumberPickerDialog(
@@ -126,7 +124,6 @@ class EditarTratamentoActivity : AppCompatActivity() {
     private fun carregarDadosAlerta(id: Long) {
         alertaRepository.getAlertaById(id)?.let { alerta ->
             // Preenche os campos com os dados do alerta
-            binding.horarioPrimeiraDoseEditar.text = alerta.horarioPrimeiraDose
             binding.periodicidadeEditar.text = alerta.periodicidade
             binding.duracaoTratamentoEditar.text = alerta.diasTratamento
             binding.doseEditar.text = alerta.dosagem
@@ -187,14 +184,13 @@ class EditarTratamentoActivity : AppCompatActivity() {
     }
 
     private fun salvarAlerta(alertaId: Long) {
-        val horarioPrimeiraDose = binding.horarioPrimeiraDoseEditar.text.toString()
         val periodicidade = binding.periodicidadeEditar.text.toString()
         val duracaoTratamento = binding.duracaoTratamentoEditar.text.toString()
         val dose = binding.doseEditar.text.toString()
         val notificar = if (binding.switchNotificarEditar.isChecked) 1 else 0
 
         // Validação dos campos
-        if (horarioPrimeiraDose.isEmpty() || periodicidade.isEmpty() || duracaoTratamento.isEmpty() || dose.isEmpty()) {
+        if (periodicidade.isEmpty() || duracaoTratamento.isEmpty() || dose.isEmpty()) {
             Toast.makeText(this, "Preencha todos os campos corretamente.", Toast.LENGTH_SHORT).show()
             return
         }
@@ -202,7 +198,6 @@ class EditarTratamentoActivity : AppCompatActivity() {
         val resultado = alertaRepository.atualizarAlerta(
             id = alertaId,
             periodicidade = periodicidade,
-            horarioPrimeiraDose = horarioPrimeiraDose,
             diasTratamento = duracaoTratamento,
             dosagem = dose,
             notificar = notificar
@@ -210,6 +205,7 @@ class EditarTratamentoActivity : AppCompatActivity() {
 
         if (resultado > 0) {
             Toast.makeText(this, "Alerta atualizado com sucesso!", Toast.LENGTH_SHORT).show()
+            //agendaRepository.atualizarAgenda(alertaId, periodicidade, diasTratamento.toInt())
             setResult(RESULT_OK)
             finish()
         } else {

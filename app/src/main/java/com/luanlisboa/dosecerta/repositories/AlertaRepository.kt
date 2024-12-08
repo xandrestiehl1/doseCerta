@@ -97,11 +97,10 @@ class AlertaRepository(context: Context) {
     }
 
 
-    fun atualizarAlerta(id: Long, periodicidade: String, horarioPrimeiraDose: String, diasTratamento: String, dosagem: String, notificar: Int): Int {
+    fun atualizarAlerta(id: Long, periodicidade: String, diasTratamento: String, dosagem: String, notificar: Int): Int {
         val db = dbHelper.writableDatabase
         val contentValues = ContentValues().apply {
             put("periodicidade", periodicidade)
-            put("horarioPrimeiraDose", horarioPrimeiraDose)
             put("diasTratamento", diasTratamento)
             put("dosagem", dosagem)
             put("notificar", notificar)
